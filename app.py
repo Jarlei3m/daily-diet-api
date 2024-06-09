@@ -12,18 +12,21 @@ db.init_app(app)
 @app.route('/meal', methods=['POST'])
 def register_meal():
   data = request.json
+
   name = data["name"]
+  on_diet = data["on_diet"]
+
+  if not name or on_diet is None:
+    return jsonify({"message": "Name and on diet fields are required!"}), 400
+
   description = data["description"]
   created_at = datetime.now(timezone.utc)
-  on_diet = data["on_diet"]
   
-  if name and on_diet:
-    meal = Meal(name=name, description=description, created_at=created_at, on_diet=on_diet)
-    db.session.add(meal)
-    db.session.commit()
-    return jsonify({"message": "Meal has been successfully registered!"})
+  meal = Meal(name=name, description=description, created_at=created_at, on_diet=on_diet)
+  db.session.add(meal)
+  db.session.commit()
+  return jsonify({"message": "Meal has been successfully registered!"})
   
-  return jsonify({"message": "Required fields are not filled"}), 400
 
 @app.route('/meal/<int:id_meal>', methods=['PUT'])
 def update_meal(id_meal):
@@ -35,7 +38,7 @@ def update_meal(id_meal):
   name = data.get('name')
   on_diet = data.get('on_diet')
 
-  if name is None or on_diet is None:
+  if not name or on_diet is None:
     return jsonify({"message": "Name and on diet fields are required!"}), 400
 
   meal.name = name
@@ -57,6 +60,19 @@ def delete_meal(id_meal):
   db.session.commit()
   return jsonify({"message": f"Meal {id_meal} was successfully removed!"})
 
+@app.route('/meal', methods=['GET'])
+def get_meals():
+  meals = Meal.query.all()
+  if not meals:
+    return jsonify({"message": "No meals registered at the moment"})
+  
+  meals_list = [meal.to_dict() for meal in meals]
+  output = {
+    "meals": meals_list,
+    "total_meals": len(meals_list)
+  }
+
+  return jsonify(output)
 
 if __name__ == '__main__':
   app.run(debug=True)
