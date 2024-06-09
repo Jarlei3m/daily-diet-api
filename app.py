@@ -47,5 +47,16 @@ def update_meal(id_meal):
 
   return jsonify({"message": f"Meal {id_meal} has been successfully updated!"})
 
+@app.route('/meal/<int:id_meal>', methods=['DELETE'])
+def delete_meal(id_meal):
+  meal = db.session.get(Meal, id_meal)
+  if not meal:
+    return jsonify({"message": "Meal not found"}), 404
+  
+  db.session.delete(meal)
+  db.session.commit()
+  return jsonify({"message": f"Meal {id_meal} was successfully removed!"})
+
+
 if __name__ == '__main__':
   app.run(debug=True)
