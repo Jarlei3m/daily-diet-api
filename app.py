@@ -74,5 +74,17 @@ def get_meals():
 
   return jsonify(output)
 
+@app.route('/meal/<int:id_meal>', methods=['GET'])
+def get_meal(id_meal):
+  meal = db.session.get(Meal, id_meal)
+  if not meal:
+    return jsonify({"message": " Meal not found"}), 404
+  
+  output = {
+    "meal": meal.to_dict()
+  }
+
+  return jsonify(output)
+
 if __name__ == '__main__':
   app.run(debug=True)
